@@ -1,0 +1,2 @@
+# EDA-for-NHDS-data
+The basic idea for this analysis is that to check what is causing people to join/visit hospitals and what are the top diagnostic codes that affects the people. Downloaded National Hospital Discharge Survey Data (NHDS) from the official site for exploratory data analysis using R. Created various visualizations and did Single, Bi and Multi-variate Analysis to get some insights into the data.
