@@ -1,0 +1,23 @@
+ [4] "X"                 "Year"              "NewBorn"          
+ [7] "UnitsofAge"        "Age"               "Sex"              
+[10] "Race"              "MaritalStatus"     "DischargeMonth"   
+[13] "DischargeStatus"   "DaysofCare"        "LengthofStay"     
+[16] "X.GeoLocation"     "Numofbeds"         "HospitalType"     
+[19] "Weight"            "SurveyYear"        "Diagnosis.Code.1" 
+[22] "Diagnosis.Code.2"  "Diagnosis.Code.3"  "Diagnosis.Code.4" 
+[25] "Diagnosis.Code.5"  "Diagnosis.Code.6"  "Diagnosis.Code.7" 
+[28] "Procedure.Code.1"  "Procedure.Code.2"  "Procedure.Code.3" 
+[31] "Procedure.Code.4"  "ModeofPayment"     "X.secondpayment"  
+[34] "DRG"               "Admissiontype"     "SourceofAdmission"
+
+
+columns association or influencing each other
+normalize the sex by percentile
+sex vs count vs age vs daysofcare vs year vs dischargestatus
+
+
+
+
+
+
+

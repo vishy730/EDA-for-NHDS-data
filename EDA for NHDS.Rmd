@@ -1,0 +1,1011 @@
+---
+title: "EDA for NHDS"
+author: "vishy"
+date: "June 9, 2016"
+output: html_document
+---
+```{r global_options, include=FALSE} 
+knitr::opts_chunk$set(echo=FALSE, 
+    warning=FALSE, ages=FALSE)
+```
+
+
+
+```{r message=FALSE, fig.width = 7, fig.height = 6, dpi = 144}
+require(knitr) # required for knitting from rmd to md
+require(markdown) # r
+# Load all of the packages that you end up using
+# in your analysis in this code chunk.
+
+# Notice that the parameter "echo" was set to FALSE for this code chunk.
+# This prevents the code from displaying in the knitted HTML output.
+# You should set echo=FALSE for all code chunks in your file.
+#Sys.setenv(RSTUDIO_PANDOC="C:/Program Files/RStudio/bin/pandoc")
+#setwd("F:/My-classes/tidy datasets")
+library(ggplot2)
+```
+
+  The basic idea for this analysis is that to check what is causing people to 
+join/visit hospitals and what are the top diagnostic codes that affects the 
+people. 
+
+```{r Load_the_Data, fig.width = 7, fig.height = 6, dpi = 144}
+# Load the Data
+nhdsdata<-read.csv("D:/udacity/project4/nhdsTidyData.csv", check.names = TRUE, 
+                   fileEncoding = "UTF-8")
+
+nhdsdatadf<-data.frame(nhdsdata)
+
+summary(nhdsdatadf)
+
+```
+
+
+We could see that there were more females than males and also there were more 
+number of Emergency Admissions.
+
+# Univariate Plots Section
+```{r Univariate_Plots, fig.width = 7, fig.height = 6, dpi = 144}
+library("ggplot2")
+library("scales")
+par("mar")
+par(mar = c(1,1,1,1))
+library("ggplot2")
+by(nhdsdatadf$DaysofCare,nhdsdatadf$Sex,summary)
+# histogram for yearly discharge
+ggplot(aes(x = Year), data = na.omit(nhdsdatadf)) + geom_histogram(bins = 10)
+# histogram for Days of Care
+ggplot(aes(x=DaysofCare), data = na.omit(nhdsdatadf)) + geom_bar() +  
+      scale_x_continuous(limits=c(0,30),breaks=seq(0,30,1))
+
+```
+
+
+Most of the discharges were less than 3 days.
+
+  
+```{r echo=FALSE, message=FALSE, fig.width = 7, fig.height = 6, dpi = 144}
+# histogram for Age
+ggplot(data = na.omit(nhdsdatadf), aes(x=Age)) + geom_histogram(binwidth = 3)
+```
+
+
+  Most of the patients were senior citizens. Also we could see the  graph showed 
+bimodal distribution. This was due to the admissions in regards to delivery of 
+babies.
+  
+```{r echo=FALSE, message=FALSE, fig.width = 7, fig.height = 6, dpi = 144}
+# histogram for DischargeStatus
+ggplot(data = na.omit(nhdsdatadf), aes(x=DischargeStatus)) + 
+       geom_bar() + 
+       scale_y_log10() + 
+       coord_flip()
+```
+
+
+We could see that most number of patients come to hospital for routine check-up.
+  
+```{r echo=FALSE, message=FALSE, fig.width = 7, fig.height = 6, dpi = 144}
+# histogram for NewBorn
+ggplot(data = na.omit(nhdsdatadf), aes(x = NewBorn)) + geom_bar() + 
+       scale_y_log10()
+```
+
+
+  Something interesting could be seen that age of patients were less than one 
+year but here we could see that there were more Non-New borns that New borns.
+  
+```{r echo=FALSE, message=FALSE, fig.width = 7, fig.height = 6, dpi = 144}
+# histogram for Race
+ggplot(data = na.omit(nhdsdatadf), aes(x=Race)) + geom_bar() + 
+       theme(axis.text.x=element_text(angle = 60, vjust = 0.5))
+```
+
+
+  Whites are predominant race in this dataset.
+
+```{r echo=FALSE, message=FALSE, fig.width = 7, fig.height = 6, dpi = 144}
+# histogram for geolocation
+ggplot(data = na.omit(nhdsdatadf), aes(x = X.GeoLocation)) + geom_bar() + 
+       scale_y_log10()
+```
+
+
+  We could see that patients were more in number from Souther Region followed by
+North-East and Mid-West regions of United States.
+  
+```{r echo=FALSE, message=FALSE, fig.width = 7, fig.height = 6, dpi = 144}
+# histogram for MaritalStatus
+ggplot(data = na.omit(nhdsdatadf), aes(x = MaritalStatus)) + geom_bar() + 
+      scale_y_log10()
+```
+
+  We could see that Married patients were more than any other patients followed 
+by Widowed. There are less number of patients from Seperated category. So it 
+meant either seperated people were more healthier or health concious in a way 
+preventive kind of.
+  
+
+```{r echo=FALSE, message=FALSE, fig.width = 7, fig.height = 6, dpi = 144}
+# factoring payment methods
+nhdsdatadf$X.secondpayment <- factor(nhdsdatadf$X.secondpayment, 
+                                     levels = c(1,2,3,4,5,6,7,8,9,10,99), 
+                                     labels = c("Worker Compensation","Medicare","Medicaid","Government","Blue Cross","HMO/PPO","Private Insurance","Self-Pay","No Charge","Others","NA"))
+
+# factoring payment methods
+nhdsdatadf$ModeofPayment <- factor(nhdsdatadf$ModeofPayment, 
+                                   levels = c(1,2,3,4,5,6,7,8,9,10,99), 
+                                   labels = c("Worker Compensation","Medicare","Medicaid","Government","Blue Cross","HMO/PPO","Private Insurance","Self-Pay","No Charge","Others","NA"))
+
+# histogram for ModeofPayment
+ggplot(data = na.omit(nhdsdatadf), aes(x = ModeofPayment)) + geom_bar() + 
+       scale_y_log10() +
+      theme(axis.text.x=element_text(angle = 45, vjust = 0.5))
+```
+
+  Highest number of patients use Medicare option followed by HMO/PPO.
+
+
+```{r echo=FALSE, message=FALSE, fig.width = 7, fig.height = 6, dpi = 144}
+# histogram for X.secondpayment
+ggplot(data = na.omit(nhdsdatadf), aes(x = X.secondpayment)) + geom_bar() + 
+       scale_y_log10() +
+      theme(axis.text.x=element_text(angle = 45, vjust = 0.5))
+```
+
+  Apart from Medicare option, Blue cross and Private Insurance paid patients 
+were more.
+
+
+```{r echo=FALSE, message=FALSE, fig.width = 7, fig.height = 6, dpi = 144}
+# histogram for Hospitaltype
+ggplot(data = na.omit(nhdsdatadf), aes(x = HospitalType)) + geom_bar() + 
+       scale_y_log10()
+```
+
+
+  More number of discharges were from Charity hospitals.
+  
+```{r echo=FALSE, message=FALSE, fig.width = 7, fig.height = 6, dpi = 144}
+# histogram for sEX
+ggplot(na.omit(nhdsdatadf), aes(x = Sex)) +
+      geom_bar(aes(y = (..count..)/sum(..count..))) +
+      scale_y_continuous(labels = percent) +
+      labs(title = "Male VS Female Discharge %", y = "Percent", x = "Sex")
+# histogram for Source of Admission
+
+# histogram for Admission type
+ggplot(data = na.omit(nhdsdatadf), aes(x = Admissiontype)) + geom_bar() + 
+       scale_y_log10() +
+      theme(axis.text.x=element_text(angle = 45, vjust = 0.5))
+```
+
+
+There were more number of Emergency Admissions followed by Physician referrals.
+```{r echo=FALSE, message=FALSE, fig.width = 7, fig.height = 6, dpi = 144}
+# getting top 10 diagnostic codes
+tab <- table(nhdsdatadf$Diagnosis.Code.1)
+tab_s <- sort(tab)# sorting the Diagnostic codes
+top_10 <- tail(names(tab_s), 10)# getting last 10 records from Diagnostic Codes.
+diag1 <- subset(nhdsdatadf, Diagnosis.Code.1 %in% top_10)# subsetting # 10 Codes
+nhdsdatadf$Diagnosis.Code.1 <- factor(nhdsdatadf$Diagnosis.Code.1, 
+                                      levels = rev(top_10))
+# histogram for diagcode1
+ggplot(data = na.omit(nhdsdatadf), aes(x=Diagnosis.Code.1)) + geom_bar() + 
+       scale_y_log10() + theme(axis.text.x=element_text(angle = 45, 
+                                                        vjust = 0.5)) + 
+                         theme(axis.text.x=element_text(angle = 45, 
+                                                        vjust = 0.5)) 
+```
+  
+  Congestive Heart Failure patients were highest that were visiting hospitals 
+followed by Pneumonia. This mean most of the citizens of US were suffering from 
+Heart related problems at least between 2001 and 2005.
+  
+```{r echo=FALSE, message=FALSE, fig.width = 7, fig.height = 6, dpi = 144}
+#getting top 10 diagnostic codes
+tab <- table(nhdsdatadf$Diagnosis.Code.2)
+tab_s <- sort(tab) # sorting the Diagnostic codes
+top_10 <- tail(names(tab_s), 10)# getting last 10 records from Diagnostic Codes.
+diag1 <- subset(nhdsdatadf, Diagnosis.Code.2 %in% top_10)# subsetting # 10 Codes
+nhdsdatadf$Diagnosis.Code.2 <- factor(nhdsdatadf$Diagnosis.Code.2, 
+                                      levels = rev(top_10))
+#histogram for diagcode2
+ggplot(data = na.omit(nhdsdatadf), aes(x=Diagnosis.Code.2)) + geom_bar() + 
+       scale_y_log10() + theme(axis.text.x=element_text(angle = 45, 
+                                                        vjust = 0.5)) + 
+                         theme(axis.text.x=element_text(angle = 45, 
+                                                        vjust = 0.5))
+```
+
+  From secondary Diagnosis Code we could infer that Atrial fillibration was the 
+cause of congestive Heart failures.
+
+```{r echo=FALSE, message=FALSE, fig.width = 7, fig.height = 6, dpi = 144}
+
+#getting top 10 diagnostic codes
+tab <- table(nhdsdatadf$Diagnosis.Code.3)
+tab_s <- sort(tab) # sorting the Diagnostic codes
+top_10 <- tail(names(tab_s), 10)# getting last 10 records from Diagnostic Codes.
+diag1 <- subset(nhdsdatadf, Diagnosis.Code.3 %in% top_10)# subsetting # 10 Codes
+nhdsdatadf$Diagnosis.Code.3 <- factor(nhdsdatadf$Diagnosis.Code.3, 
+                                      levels = rev(top_10))
+#histogram for diagcode3
+ggplot(data = na.omit(nhdsdatadf), aes(x=Diagnosis.Code.3)) + geom_bar() + 
+       scale_y_log10() + theme(axis.text.x=element_text(angle = 45, 
+                                                        vjust = 0.5)) + 
+                         theme(axis.text.x=element_text(angle = 45,
+                                                        vjust = 0.5))
+```
+
+
+  Hypertension was the next big thing that people were suffering with and this 
+was the reason we get the source of admission as routine with higher statistics.
+  
+```{r echo=FALSE, message=FALSE, fig.width = 7, fig.height = 6, dpi = 144}
+
+#getting top 10 diagnostic codes
+tab <- table(nhdsdatadf$Diagnosis.Code.4)
+tab_s <- sort(tab)# sorting the Diagnostic codes
+top_10 <- tail(names(tab_s), 10)# getting last 10 records from Diagnostic Codes.
+diag1 <- subset(nhdsdatadf, Diagnosis.Code.4 %in% top_10)# subsetting # 10 Codes
+nhdsdatadf$Diagnosis.Code.4 <- factor(nhdsdatadf$Diagnosis.Code.4, 
+                                      levels = rev(top_10))
+#histogram for diagcode4
+ggplot(data = na.omit(nhdsdatadf), aes(x=Diagnosis.Code.4)) + geom_bar() + 
+       scale_y_log10() + 
+       theme(axis.text.x=element_text(angle = 45, vjust = 0.5)) + 
+       theme(axis.text.x=element_text(angle = 45, vjust = 0.5))
+```
+
+
+Atherosclerosis - forming plaque in blood vessels was the next highest 
+diagnostic problem people were identified with.
+
+```{r echo=FALSE, message=FALSE, fig.width = 7, fig.height = 6, dpi = 144}
+
+#getting top 10 diagnostic codes
+tab <- table(nhdsdatadf$Diagnosis.Code.5)
+tab_s <- sort(tab)# sorting the Diagnostic codes
+top_10 <- tail(names(tab_s), 10)# getting last 10 records from Diagnostic Codes.
+diag1 <- subset(nhdsdatadf, Diagnosis.Code.5 %in% top_10)# subsetting # 10 Codes
+nhdsdatadf$Diagnosis.Code.5 <- factor(nhdsdatadf$Diagnosis.Code.5, 
+                                      levels = rev(top_10))
+#histogram for diagcode5
+ggplot(data = na.omit(nhdsdatadf), aes(x=Diagnosis.Code.5)) + geom_bar() + 
+       scale_y_log10() + 
+       theme(axis.text.x=element_text(angle = 45, vjust = 0.5)) + 
+       theme(axis.text.x=element_text(angle = 45, vjust = 0.5))
+
+# getting top 10 diagnostic codes
+tab <- table(nhdsdatadf$Diagnosis.Code.6)
+tab_s <- sort(tab)# sorting the Diagnostic codes
+top_10 <- tail(names(tab_s), 10)# getting last 10 records from Diagnostic Codes.
+diag1 <- subset(nhdsdatadf, Diagnosis.Code.6 %in% top_10)# subsetting # 10 Codes
+nhdsdatadf$Diagnosis.Code.6 <- factor(nhdsdatadf$Diagnosis.Code.6, 
+                                      levels = rev(top_10))
+# histogram for diagcode6
+ggplot(data = na.omit(nhdsdatadf), aes(x=Diagnosis.Code.6)) + geom_bar() + 
+       scale_y_log10() +
+       theme(axis.text.x=element_text(angle = 45, vjust = 0.5)) +
+       theme(axis.text.x=element_text(angle = 45, vjust = 0.6))
+
+# getting top 10 diagnostic codes
+tab <- table(nhdsdatadf$Diagnosis.Code.7)
+tab_s <- sort(tab)# sorting the Diagnostic codes
+top_10 <- tail(names(tab_s), 10)# getting last 10 records from Diagnostic Codes.
+diag1 <- subset(nhdsdatadf, Diagnosis.Code.7 %in% top_10)# subsetting # 10 Codes
+nhdsdatadf$Diagnosis.Code.7 <- factor(nhdsdatadf$Diagnosis.Code.7, 
+                                      levels = rev(top_10))
+# histogram for diagcode7
+ggplot(data = na.omit(nhdsdatadf), aes(x=Diagnosis.Code.7)) + geom_bar() + 
+       scale_y_log10() +        
+       theme(axis.text.x=element_text(angle = 45, vjust = 0.5)) +
+       theme(axis.text.x=element_text(angle = 45, vjust = 0.7))
+```
+
+
+```{r echo=FALSE, Bivariate_Plots}
+#Getting the percentage of different races.
+ggplot(na.omit(nhdsdatadf), aes(x = Race)) +
+       geom_bar(aes(y = (..count..)/sum(..count..))) +
+       scale_y_continuous(labels = percent) +
+       labs(title = "Race Percentage", y = "Percent", x = "Race")
+```
+
+  The percentage of Whites is more among the races.
+
+
+# Univariate Analysis
+
+### What is the structure of your dataset?
+
+There were 1646165 observations in the dataset with 36 features and I have 
+selected omitted 10 features for this analysis. This dataset was mainly about 
+the discharge status of US patients for a period 2001-2005. Their diagnosis, 
+race, payment method etc were some features of interest.
+
+Other Observations:
+
+* New borns were less
+* People tend to go to Charity hospitals more
+* Whites were more prone to diseases as compared to other Race.
+* Apart from NA, Single patients were highest and seperated were lowest.
+* Mean of DaysofCare
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+with(nhdsdatadf, mean(nhdsdatadf$DaysofCare))
+```
+* Mean of Age
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+with(nhdsdatadf, mean(nhdsdatadf$Age))
+```
+* Median of DaysofCare
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+with(nhdsdatadf, median(nhdsdatadf$DaysofCare))
+```
+* Median of Age
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+with(nhdsdatadf, median(nhdsdatadf$Age))
+```
+* Standard Deviation of DaysofCare
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+with(nhdsdatadf, sd(nhdsdatadf$DaysofCare))
+```
+* Standard Deviation of Age
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+with(nhdsdatadf, sd(nhdsdatadf$Age))
+
+
+```
+
+### What is/are the main feature(s) of interest in your dataset?
+
+  The main features in the dataset were Race,Sex, Age, Discharge Status, 
+Diagnosis Code, Source of Admission and Mode of payment. 
+
+### What other features in the dataset do you think will help support your investigation into your feature(s) of interest?
+
+  Weight and Geolocation were likely to contribute to the discharge status of 
+the patients. 
+
+### Did you create any new variables from existing variables in the dataset?
+  No.I have not created any new variable.
+
+### Of the features you investigated, were there any unusual distributions? Did you perform any operations on the data to tidy, adjust, or change the form of the data? If so, why did you do this?
+  We could see bimodal distrbution for Age feature. I have done lot of cleaning 
+the data such as removing spaces and blanks, replacing diagnosis codes based on 
+ICD codes, factoring almost all features.
+
+# Bivariate Plots Section
+
+
+```{r echo=FALSE, message=FALSE, fig.width = 7, fig.height = 6, dpi = 144}
+
+qplot(x = Sex, y = DaysofCare, geom = 'boxplot', main = 'Sex Vs Days of Care', 
+      data = na.omit(nhdsdatadf), ylim = c(0,10))
+```
+
+
+  We could see that the boxplot for Males was taller than the Females which 
+suggest that Males stayed more than the Females. Most of the Females were 
+dsicharged/stayed at the hopsital for same number of days relatively. We wanted 
+to check whether males or females stayed longer in hospitals. 
+  
+
+```{r echo=FALSE, message=FALSE, fig.width = 7, fig.height = 6, dpi = 144}
+qplot(x     = DaysofCare, y = ..count../sum(..count..), 
+      data  = nhdsdatadf, geom = 'freqpoly', 
+      color = Sex, ylab = 'Proportion', 
+      main  = 'Proportion of Days of Care among Males and Females') +       
+      scale_x_log10() 
+```
+
+
+  Though females were on higher side of count, males stayed longer than females. 
+This was intersting to observe that though men were physically stronger, they 
+take more time to recover than women. We wanted to see whether the proportion of 
+females were more when missing values included as well and as expected females 
+has higher proportion of visiting and staying in hospitals.
+  
+
+```{r echo=FALSE, message=FALSE, fig.width = 7, fig.height = 6, dpi = 144}
+qplot(x = Sex, y = Age, data = nhdsdatadf, geom = 'boxplot', 
+      xlab = 'Sex', ylab = 'Age', main = 'Age Vs Sex') + 
+      scale_y_continuous(lim = c(0,99),breaks = seq(0,99,5)) 
+```
+
+
+  Compared to Females, Males started visiting hospitals at a relative younger 
+age. Median of Males were on a bit higher side than Females. We wanted to check 
+the hospital visits' age range based on gender while considering NA values, 
+and we can see here Males were visiting more than females.
+
+
+```{r echo=FALSE, message=FALSE, fig.width = 7, fig.height = 6, dpi = 144}
+spineplot(nhdsdatadf$Age, nhdsdatadf$Sex, xlab = 'Age', ylab = 'Sex', 
+          main = 'Age Vs Sex', col = c('pink','green'))
+```
+
+
+  Female discharges are higher between the ages 20-35 for obvious reasons such 
+as pregnancy. After 50 males and females who were visiting hospitals were same 
+in number.However, at later stages again female patients who visit hospitals 
+were increased in number which says females are more prone for various ailments.
+
+```{r echo=FALSE, message=FALSE, fig.width = 7, fig.height = 6, dpi = 144}
+qplot(x    = Diagnosis.Code.1, y = Age, data = na.omit(nhdsdatadf), 
+      geom = 'boxplot', 
+      xlab = 'Diagnosis Code 1', ylab = 'Age') + 
+      scale_y_continuous(lim = c(40,90), breaks = seq(40,90,5)) + 
+      theme(axis.text.x = element_text(angle = 45, vjust = 0.5)) + 
+      labs(title = "Age Vs Diagnosis Code 1")
+```
+
+
+  We could observe that most of the diseases started from late 30s'. Yes most of 
+  them are outliers that significantly change the way we interpret the data. 
+However, we can't deny the fact of people falling ill early. Interestingly we 
+could see pregnant women at as high as 47 years.
+
+
+```{r echo=FALSE, message=FALSE, fig.width = 7, fig.height = 6, dpi = 144}
+ggplot(nhdsdatadf, aes(DaysofCare,Age)) + geom_point(alpha = 1/10) + 
+       geom_smooth(method = "lm", se = FALSE) +    
+       scale_y_continuous(lim = c(0,100),breaks = seq(0,100,5)) + 
+       scale_x_continuous(lim = c(0,100),breaks = seq(0,100,10)) + 
+       labs(title = "Age Vs Days of Care")
+
+```
+
+
+  We could see the trend that, as the age advances the number of days of stay 
+also increases. The expectation was - days of care should increase as the age 
+increase and the chart showed the same.
+
+
+```{r echo=FALSE, message=FALSE, fig.width = 7, fig.height = 6, dpi = 144}
+# renaming the factors of DischargeStatus due to the length of previous factors.
+levels(nhdsdatadf$DischargeStatus) <- c("Alive", "Dead", "Medical Advice", 
+                                        "Routine", "long term stay", 
+                                        "short term stay")
+# mosaic plot displaying the relation between Discharge status and Sex
+mosaicplot(~nhdsdatadf$DischargeStatus + nhdsdatadf$Sex, 
+           xlab = 'DischargeStatus', 
+           ylab = 'Sex', 
+           las  = 2, 
+           cex.axis = 0.8, 
+           main = 'Discharge Status vs Sex') 
+```
+
+
+Apart from routine check-up, more females were advised to go for long-term 
+facility than men. 
+
+```{r echo=FALSE, message=FALSE, fig.width = 7, fig.height = 6, dpi = 144}
+with(nhdsdatadf, table(nhdsdatadf$Sex, nhdsdatadf$DischargeStatus))
+```
+
+
+```{r echo=FALSE, message=FALSE, fig.width = 7, fig.height = 6, dpi = 144}
+ggplot(aes(x = SourceofAdmission, fill = Sex),data = nhdsdatadf) + 
+       geom_bar(position = 'dodge') +
+       theme(axis.text.x = element_text(angle = 90, vjust = 0.5)) +
+       scale_y_log10() + labs(title = "Source of Admission Vs Sex")
+```
+
+  Comparitively Physical referral has more number of females than males.
+  
+```{r echo=FALSE, message=FALSE, fig.width = 7, fig.height = 6, dpi = 144} 
+with(nhdsdatadf, table(nhdsdatadf$SourceofAdmission, nhdsdatadf$Sex))
+```
+
+
+
+```{r echo=FALSE, message=FALSE, fig.width = 7, fig.height = 6, dpi = 144}
+qplot(x = SourceofAdmission,y = Age,data = nhdsdatadf, geom = 'boxplot', 
+      xlab = 'Source of Admission', 
+      ylab = 'Age', 
+      main = 'Age wise Source of Admission') +   
+      scale_y_continuous(lim = c(45,90),breaks = seq(45,99,2)) + 
+      theme(axis.text.x = element_text(angle = 90, vjust = 0.5))
+```
+
+
+  Most of the Emergency cases were recorded between ages 60 and 75. 
+
+
+```{r echo=FALSE, message=FALSE, fig.width = 7, fig.height = 6, dpi = 144}
+mosaicplot(nhdsdatadf$Sex~nhdsdatadf$X.GeoLocation, 
+           las =2, 
+           ylab = 'Geo Location', 
+           xlab = 'Sex', 
+           main = 'Geo Location vs Sex')
+
+with(nhdsdatadf, table(nhdsdatadf$Sex, nhdsdatadf$X.GeoLocation))
+```
+
+
+  People in Souther region were more prone to diseases Mid-west region has the 
+healthiest people.
+
+```{r echo=FALSE, message=FALSE, fig.width = 7, fig.height = 6, dpi = 144}
+ggplot(nhdsdatadf, aes(x = X.GeoLocation, fill = Sex)) + 
+       geom_bar(position = "dodge") + 
+       scale_y_log10() + labs(title = 'Location Vs Sex', x = "Region")
+
+with(nhdsdatadf, table(nhdsdatadf$Sex, nhdsdatadf$X.GeoLocation))
+```
+
+
+  Patients or the people visiting hospitals were more in Souther region than 
+other regions.The expectation was - which region is more prone to diseases or 
+the people of which region fall ill often.
+
+```{r echo=FALSE, message=FALSE, fig.width = 7, fig.height = 6, dpi = 144}
+ggplot(nhdsdatadf, aes(x = X.GeoLocation, fill = ModeofPayment), 
+       xlab("Geographic Location")) + 
+       geom_bar(position = {'dodge'}) + scale_y_log10() + 
+       labs(title = 'Location Vs Mode of Payment')
+```
+
+
+  Most of the people were availing Medicare option for payment followed by 
+HMO/PPO and private insurance.
+
+```{r echo=FALSE, message=FALSE, fig.width = 7, fig.height = 6, dpi = 144}
+ggplot(nhdsdatadf, aes(x = Age)) + geom_histogram(binwidth = 2) + 
+       facet_grid(Sex ~.) +
+       scale_x_continuous(lim = c(0,99),breaks = seq(0,99,3)) + 
+       labs(title='Age Vs Sex')
+```
+
+
+The bimodal distribution for Females was from pregnancy and regular check-ups. 
+Also we could see Men were visiting regularly as early as from the age of 35.
+
+```{r echo=FALSE, message=FALSE, fig.width = 7, fig.height = 6, dpi = 144}
+ggplot(nhdsdatadf, aes(x = Race)) +
+  geom_bar(aes(y = (..count..)/sum(..count..))) +
+  scale_y_continuous(labels = percent) +
+  labs(title = "Race Percentage Vs Sex", y = "Percent", x = "Race") + 
+  facet_grid(Sex~.) +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5))
+```
+
+
+We could see that Black men were more healthier than White men and Black women 
+as well. 
+
+```{r echo=FALSE, message=FALSE, fig.width = 7, fig.height = 6, dpi = 144}
+ggplot(na.omit(nhdsdatadf), aes(x = Race)) +
+       geom_bar(aes(y = (..count..)/sum(..count..))) +
+       scale_y_continuous(labels = percent) +
+       labs(title = "Race Percentage Vs Source of Admission", 
+            y     = "Percent", 
+            x     = "Race") +  
+       facet_grid(. ~ SourceofAdmission, scales = "free", space = "free") +
+       theme(axis.text.x = element_text(angle = 90, vjust = 0.5, size = 10, 
+                                        face  = "bold")) 
+```
+
+
+  The percentage of Whites is more than any other race. The chart was expected 
+to find the percentage of Races according to mode of admission. Among the source 
+of admission, Emergency and Physical referral were the more than any other mode 
+of admission.
+
+
+```{r echo=FALSE, message=FALSE, fig.width = 7, fig.height = 6, dpi = 144}
+ggplot(nhdsdatadf, aes(x = Race)) +
+       geom_bar(aes(y = (..count..)/sum(..count..))) +
+       scale_y_continuous(labels = percent) +
+       labs(title = "Race Vs Location", y = "Percent", x = "Race") +  
+       facet_grid(X.GeoLocation~.) + 
+       theme(axis.text.x=element_text(angle = 90, vjust = 0.5))
+
+with(nhdsdatadf, table(nhdsdatadf$Race, nhdsdatadf$X.GeoLocation))
+```
+
+
+  Whites from Southern location fell ill often than other races from all the 
+regions. The chart was drawn to understand the area-wise percentage of different 
+races.
+
+
+```{r echo=FALSE, message=FALSE, fig.width = 7, fig.height = 6, dpi = 144}
+racesubset <- subset(nhdsdatadf, 
+                     Race =='White' | Race == 'Black' | Race == 'Other')
+ggplot(racesubset, aes(x = Age)) +
+       geom_bar(aes(y = (..count..)/sum(..count..))) +
+       scale_y_continuous(labels = percent) +
+       labs(title = "Age Vs Race", y = "Percent", x = "Age") + 
+       facet_grid(Race~.) +
+       scale_x_continuous(lim = c(0,99),breaks = seq(0,99,2))
+```
+
+
+  Comparitively Whites were more prone to ill-health than any other race. We 
+have omitted other races as they were relatively very negligible. The 
+expectation was - Whites percentage should be more than the other races to 
+support previous claims.
+  
+
+```{r echo=FALSE, message=FALSE, fig.width = 7, fig.height = 6, dpi = 144}
+ggplot(racesubset, aes(x = Age)) +
+       geom_bar(aes(y = (..count..)/sum(..count..))) +
+       scale_y_continuous(labels = percent) +
+       labs(title = "Percentage of Age Vs Sex", y = "Percent", x = "Age") +
+       facet_grid(Sex~.) + scale_x_continuous(lim = c(0,100), 
+                                              breaks = seq(0,100,3))
+```
+
+
+  The expectation from this chart was that the percentage of females should be 
+more than Males to support previous claims.
+
+```{r echo=FALSE, message=FALSE, fig.width = 7, fig.height = 6, dpi = 144}
+ggplot(nhdsdatadf, aes(x = HospitalType)) +
+       geom_bar(aes(y = (..count..)/sum(..count..))) +
+       scale_y_continuous(labels = percent) +
+       labs(title = "HospitalType Vs Source of Admission", 
+                y = "Percent", 
+                x = "Hospital Type") +
+       facet_grid(X.GeoLocation~.) + 
+       theme(axis.text.x = element_text(angle = 45, vjust = 0.5)) 
+```
+
+  
+  Admissions were more in Charity hospitals than in any other hospitals. We 
+wanted to see which type of hospitals were serving more people even though we 
+came to know that most people pay through Medicare. So the question now is - 
+Are the charity hospitals really doing charity? 
+
+
+# Bivariate Analysis
+
+
+
+### Talk about some of the relationships you observed in this part of the investigation. How did the feature(s) of interest vary with other features in the dataset?
+
+  The dataset I used was limited to 5 years data. Its something interesting that 
+there was relationship between the race and location. Whites were highly prone 
+to heart attacks as that was the top diagnosis code whites see the doctor. Also 
+we could observe from the dataset that Whites see doctor regularly as early as 
+from 35th year.
+
+### Did you observe any interesting relationships between the other features (not the main feature(s) of interest)?
+
+  Lot of Charity activities were going in Southern region as compared to other 
+regions. It could be infered that there were way big number of charity hospitals 
+in Midwest and South. Though Mid-west has slightly more number of hospitals than 
+South, South recorded more number of charity discharges than Mid-West. This 
+seems Southern region was under developed or way too rich as the there might be 
+many people started charity organizations in their regions to support the 
+citizens. However we could see that there way too high number of proprietary 
+hospitals that confirm the existence of affordable or rich class of people in 
+South. 
+
+### What was the strongest relationship you found?
+
+  The strongest relation I found was the Race Vs Location. This might also be 
+due to the fact of the white population more in the region. However given the 
+fact that Whites were almost double the population of Blacks, the proportion of 
+hospital visits was not according to the population. So Whites were more prone 
+to the diseases than Blacks,  
+
+
+# Multivariate Plots Section
+
+```{r echo=FALSE, Multivariate_Plots}
+# getting top 10 Diagnostic Codes
+ggplot(diag1, aes(x = Race, y = Age)) +
+       geom_tile(aes(fill = Diagnosis.Code.1), colour = "white") +
+       scale_fill_brewer(palette = "PRGn") + 
+       theme(axis.text.x = element_text(angle = 45, vjust = 0.5)) +
+       scale_y_continuous(limits = c(0,80),breaks = seq(0,80,5)) +
+       theme(plot.title = element_text(lineheight = .8, face = "bold")) +
+       labs(title = "Age wise Diagnosis Code for different Races", 
+            y     = "Age") 
+
+```
+
+
+  From the heat map we could see that Delivery Single born live started at the 
+beginning of teen age itself. Coronary Heart Failure (CHF) was observed at 
+relative younger age of around 35. 
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, fig.width = 7}
+femalesubset <- subset(nhdsdatadf,nhdsdatadf$Sex == 'Female' & 
+                       nhdsdatadf$Diagnosis.Code.1 == 'Deliver-single liveborn')
+
+min(femalesubset[,6])
+max(femalesubset[,6])
+```
+
+
+The min age for females that joined hospital for Delivery is 11 and max age is 58.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+# subsetting the dataset to get the data with DischargeStatus 'Dead'
+deadsubset <- subset(nhdsdatadf,nhdsdatadf$DischargeStatus == 'Dead')
+tail(sort(summary(na.omit(deadsubset$Diagnosis.Code.1))))
+```
+
+
+  The top 5 diagnostic codes that people were discharged as Dead. From the above 
+Diagnostic Codes people were joining hospitals under Emergency Category.
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+ggplot(deadsubset,aes(x=Age,fill=Sex), color=Sex) +  
+  geom_bar(position = "dodge") + scale_x_continuous(lim=c(0,89),
+                                                    breaks=seq(0,89,5)) +
+  labs(x = 'Age', 
+       y      = 'Count', 
+       title  = 'Age wise Dead Count')
+```
+
+
+  We could see that infant boys died most than infact girls.
+       
+
+* Median of DaysofCare for DischargeStatus 'Dead'
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+with(deadsubset, median(deadsubset$DaysofCare))
+```
+* Median of Age for DischargeStatus 'Dead'
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+with(deadsubset, median(deadsubset$Age))
+```
+
+* Mean of DaysofCare for DischargeStatus 'Dead'
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+with(deadsubset, mean(deadsubset$DaysofCare))
+```
+
+* Mean of Age for DischargeStatus 'Dead'
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+with(deadsubset, mean(deadsubset$Age))
+```
+
+* SD of Age for DischargeStatus 'Dead'
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+# Standard Deviation for Age
+with(deadsubset, sd(deadsubset$Age))
+```
+
+* SD of DaysofCare for DischargeStatus 'Dead'
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+# Standard Deviation for DaysofCare
+with(deadsubset, sd(deadsubset$DaysofCare))
+```
+  
+  
+  
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+# subsetting the dataset to get the data with SourceofAdmission 'Emergency'
+emergencysubset <- subset(nhdsdatadf,
+                          nhdsdatadf$SourceofAdmission == 'Emergency')
+tail(sort(summary(na.omit(emergencysubset$Diagnosis.Code.1))))
+```
+
+
+
+```{r echo=FALSE, message=FALSE, fig.width = 7, fig.height = 6, dpi = 144}
+ggplot(nhdsdatadf, aes(x = Race, y = Age, fill = HospitalType)) + 
+       geom_boxplot() + 
+       facet_wrap(~X.GeoLocation) + 
+       theme(axis.text.x = element_text(angle = 45, vjust = 0.5))
+```
+
+
+  Whites were using Propreitary Hospitals even though Charity and Government 
+Hospitals. At the same time Whites were the most that visit hospitals. Though 
+there were more charity hospitals in Southern region, people used more charity 
+hospitals in North East region than Southern region. So this might be due to the 
+affordable class in South compared to other regions.
+
+```{r echo=FALSE, message=FALSE, fig.width = 7, fig.height = 6, dpi = 144}
+ggplot(nhdsdatadf, aes(x = Race, y = Age, fill = Sex)) + geom_boxplot() +                          facet_wrap(~X.GeoLocation) +
+       theme(axis.text.x = element_text(angle = 90, vjust = 0.5)) +                                scale_y_continuous(lim = c(0,85), breaks = seq(0,85,5))
+```
+
+
+  We could see the range of Men was more when compared to Women. Men might be 
+  suffering with various ailments. Also we could see that except in Mid-west 
+  region, Men were prone to diseases since childhood.
+  
+```{r echo=FALSE, message=FALSE, fig.width = 7, fig.height = 6, dpi = 144}
+ggplot(nhdsdatadf,aes(x = DischargeStatus,y = Age,fill = Sex), color = Sex) +  
+       stat_summary(fun.y = median,position = position_dodge(),geom = "bar") + 
+       scale_y_continuous(lim = c(0,80),breaks = seq(0,80,5)) +
+       theme(axis.text.x = element_text(angle = 90, vjust = 0.5))
+```
+
+
+  Men were more prone to ailments at early age than Women. We could also observe 
+that there was nearly 10 years age difference between Men's and Women's life span. 
+
+```{r echo=FALSE, message=FALSE, fig.width = 7, fig.height = 6, dpi = 144}
+ggplot(nhdsdatadf, aes(x = DischargeStatus, y = Age, fill = Sex)) + 
+       geom_boxplot() + facet_wrap(~X.GeoLocation) + 
+       theme(axis.text.x = element_text(angle = 90, vjust = 0.5)) +                                 scale_y_continuous(lim = c(0,85), breaks = seq(0,85,5))
+```
+
+
+  We could see a dip in Medical advice for North-East people. We could infer 
+that they visit hospitals at later stages of diseases. Also peple from 
+North-Eastern region were discharged as dead more than any other region. Either 
+facilities might not be there or people visit hospitals at later stages where 
+ailment was not curable even transferred to long-term facility as we could see 
+from the graph that people from this region were transferred more to 
+long-term facility.
+  
+```{r echo=FALSE, message=FALSE, fig.width = 7, fig.height = 6, dpi = 144}
+with(nhdsdatadf, table(nhdsdatadf$DischargeStatus, nhdsdatadf$X.GeoLocation))
+```
+
+  However, the statistics shows a different version. So missing values were 
+  playing an important role in this particular analysis. We could infer much 
+  accurately if we could check data for few more years before coming to any 
+  conclusion.
+
+
+```{r echo=FALSE, message=FALSE, fig.width = 18, fig.height = 12, dpi = 144}
+# getting top 10 diagnostic codes
+tab <- table(nhdsdatadf$Diagnosis.Code.1)
+tab_s <- sort(tab)# sorting the diagnostic codes
+top_10 <- tail(names(tab_s), 10)# selecting last 10 records
+diag1 <- subset(nhdsdatadf, Diagnosis.Code.1 %in% top_10)# subsetting # 10 codes
+# renaming the DischargeStatus as they are longer to show in the graph.
+levels(diag1$DischargeStatus) <- c("Alive", "Dead", "Medical Advice", "Routine",
+                                       "long term stay", "short term stay")
+#bar graph
+ggplot(diag1, aes(x = DischargeStatus, fill = Sex)) +
+       geom_bar(position = "dodge") +
+       labs(title = "Discharge Status based on Diagnosis Code and Gender", 
+                y = "Average", 
+                x = "Discharge Status") + 
+       facet_grid(.~ Diagnosis.Code.1) +
+       theme(axis.text.x  = element_text(angle = 60, vjust = 0.5)) +
+       theme(strip.text.x = element_text(angle = 45, size  = 10)) +
+       scale_y_log10()
+```
+
+
+  This chart concreted the claim of Routine check-up as the most used Discharge 
+status. Also the delivery of boys were slightly higher than that of girls.
+  
+# Multivariate Analysis
+
+### Talk about some of the relationships you observed in this part of the investigation. Were there features that strengthened each other in terms of looking at your feature(s) of interest?
+
+  Women were healthier than Men and we could see that the White people were more 
+prone to ailments compared to any other race. It could also be inferred that the 
+Southern region has more number of hospitals as we could see more number of 
+hospitals there. 
+
+### Were there any interesting or surprising interactions between features?
+
+  Also Souther region has more number of propreitary hospitals compared to other 
+regions that signifies more number of affordable class present there. So we 
+could co-relate more money more ailments. 
+  
+
+### OPTIONAL: Did you create any models with your dataset? Discuss the strengths and limitations of your model.
+
+------
+
+# Final Plots and Summary
+
+### Plot One
+```{r echo=FALSE, Plot_One, warning=FALSE}
+ggplot(deadsubset,aes(x=Age,fill=Sex), color=Sex) +  
+       geom_bar(position = "dodge") + scale_x_continuous(lim=c(0,89),
+                                                         breaks=seq(0,89,5)) +
+       labs(x = 'Age', 
+       y      = 'Count', 
+       title  = 'Age wise Dead Count') + scale_y_log10()
+```
+
+
+### Description One
+
+  Women lived longer than Men. Applying log scale to y-axis shwowed even more 
+detailed information. Even Women who got discharged from hospitals were 
+more in number than Men.Though we have higher number of women in the given 
+dataset, the data of Men which was recorded showed the health trend among Men 
+in US across all regions. We could also observe that baby boys were more prone 
+to death when compared to baby girls.
+
+
+### Plot Two
+```{r echo=FALSE, Plot_Two, fig.width = 7, fig.height = 6, dpi = 144}
+ggplot(nhdsdatadf,aes(x = DischargeStatus, y = Age, fill = Race), 
+       color = Race) +  
+       stat_summary(fun.y = median,position = position_dodge(), geom = "bar") + 
+       scale_y_continuous(lim = c(0,80),breaks = seq(0,80,5)) +
+       theme(axis.text.x = element_text(angle = 90, vjust = 0.5)) + 
+       labs(title = 'Age wise Discharge Status of Different Races')
+
+```
+
+### Description Two
+
+  Most of the People at later age were sent to long-term facility. This mean 
+there were very good facilities available that could treat dealy diseases. 
+Median for Alive Discharge status is around 60 which is good and also the Median
+for Dead is around 65. Routine check-ups started at as early as late 30s.(probably Diabeties)
+
+
+```{r echo=FALSE, Plot_stat_Three, fig.width = 7, fig.height = 6, dpi = 144}
+by(nhdsdatadf$Age, list(nhdsdatadf$Race, nhdsdatadf$DischargeStatus), median)
+```
+
+  
+
+### Plot Three
+```{r echo=FALSE, Plot_Three, fig.width = 7, fig.height = 6, dpi = 144}
+
+tab <- table(nhdsdatadf$Diagnosis.Code.1)
+tab_s <- sort(tab)# sorting codes
+top_10 <- tail(names(tab_s), 10)# getting tail data from the sorted set
+diag1 <- subset(nhdsdatadf, Diagnosis.Code.1 %in% top_10)
+ggplot(diag1, aes(x = Race, y = Diagnosis.Code.1)) +
+       geom_tile(aes(fill = Sex), colour = "white") +
+       scale_fill_brewer(palette = "PRGn") + 
+       theme(axis.text.x = element_text(angle = 45, vjust = 0.5)) +
+       labs(title = "Race Wise Diagnosis Code Among Men and Women", 
+            x     = "Race")
+
+```
+
+### Description Three
+
+  Crnry athrscl natve vssl was more common amonge Men. Even Pneumonia was also 
+among the top diseases that affected Men more than Women. As this is a pollution 
+related ailment, we could infer that there were more working Men than Women 
+because working men were exposed more to pollution outside. Another interesting 
+finding is more Women were discharged with Rehabilitation procedure than Men.  
+
+------
+
+
+# Reflection
+
+  The NHDS data set contains 1646165 observations from 2001 to 2005. I started 
+cleaning the data first and factoring them. All NA values were omitted from 
+the analysis. Yes, I could see that there is difference/variance in the relation 
+between the variables when compared to the dataset with missing values to the 
+dataset without missing values. As this is the Survery data it was assumed that 
+the outliers were natural. I also mapped all the diagnostic codes with appropriate 
+short descriptions using scripts. I started exploring each variable in the dataset 
+and then explored interesting questions such as which gender was more prone to 
+seeing doctor apart from regular delivery for Women. Different type of charts are 
+showing different kind of perspectives and is really harder to pick the best ones 
+that shows some of the relations between the featuers. I even consulted a coach 
+from Udacity and after discussion I came to know that, I have taken really a 
+complext data set. So I followed the coach's suggestions such as trying to 
+identify the co-relation between diagnostic codes and discharge status and sex 
+etc,. I could see some strong relation between race and the diagnosis code. 
+Eventually I explored deeper to see any demographic connection for diagnosis code. 
+Also the other thing I could observe is the population mostly consist of Whites 
+and Blacks and the proportion to ailments between whites and Blanks were very 
+different. Even I googled a bit about the regions in US to cross check the 
+population and socio-economic conditions to cross verify my findings. Blacks 
+were not that proportional to the ailments as their population represent whereas 
+Whites had very much higher proportion. In fact Diabeties, for which US is 
+notorious for, is not on the top 5 diagnostic list as it might have covered under 
+routine check-up and the status shows the same that Routine check-up has the 
+highest count. A recent data set would have been better to come to a solid 
+conclusion. 
+  
+  The main idea for future work is that we could take the dataset of Whites 
+(as they were more in number in the dataset) alone along with more years data 
+and could get what really bothering/affecting them.
+
